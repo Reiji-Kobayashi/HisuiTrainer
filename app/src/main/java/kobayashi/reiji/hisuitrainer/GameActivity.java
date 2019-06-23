@@ -1,6 +1,7 @@
 package kobayashi.reiji.hisuitrainer;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.os.Bundle;

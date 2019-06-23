@@ -4,6 +4,7 @@ package kobayashi.reiji.hisuitrainer;
  * Created by kobayashireiji on 2018/12/07.
  */
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -26,7 +28,7 @@ import java.lang.Math;
 public class GameView extends SurfaceView implements SurfaceHolder.Callback{
 
     //ゲームシステム全般
-    public int mode=0 ,counter=0;
+    public int mode=10 ,counter=0;
     public int startflag=0;
 
     //ステージ（描画範囲）
@@ -54,23 +56,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
     //画像
     Resources res = this.getContext().getResources();
 
-    Bitmap Imhisui0 = BitmapFactory.decodeResource(res, R.drawable.hisui_ori);
-    Bitmap hisui0 = Bitmap.createScaledBitmap(Imhisui0,200
-            ,sizey,false);
-    Bitmap Imhisui1 = BitmapFactory.decodeResource(res, R.drawable.hisui1);
-    Bitmap hisui1 = Bitmap.createScaledBitmap(Imhisui1,sizex,sizey,false);
-    Bitmap Imhisui2 = BitmapFactory.decodeResource(res, R.drawable.hisui2);
-    Bitmap hisui2 = Bitmap.createScaledBitmap(Imhisui2,sizex,sizey,false);
-    Bitmap Imhisui3 = BitmapFactory.decodeResource(res, R.drawable.hisui3);
-    Bitmap hisui3 = Bitmap.createScaledBitmap(Imhisui3,sizex,sizey,false);
+    Bitmap Imhisui0 = BitmapFactory.decodeResource(res, R.drawable.hisui0);
+    Bitmap hisui0 = Bitmap.createScaledBitmap(Imhisui0,200,sizey,false);
 
-    Bitmap Imcoin = BitmapFactory.decodeResource(res, R.drawable.coin_ori);
+
+    Bitmap Imcoin = BitmapFactory.decodeResource(res, R.drawable.coin);
     Bitmap coin = Bitmap.createScaledBitmap(Imcoin,sizex,sizex,false);
 
-    Bitmap Impower0 = BitmapFactory.decodeResource(res, R.drawable.power_ori);
+    Bitmap Impower0 = BitmapFactory.decodeResource(res, R.drawable.power0);
     Bitmap power0 = Bitmap.createScaledBitmap(Impower0,sizex,sizex,false);
-    Bitmap Impower1 = BitmapFactory.decodeResource(res, R.drawable.power1);
-    Bitmap power1 = Bitmap.createScaledBitmap(Impower1,sizex,sizex,false);
 
     Bitmap Immana = BitmapFactory.decodeResource(res, R.drawable.mana);
     Bitmap mana = Bitmap.createScaledBitmap(Immana,100,100,false);
@@ -98,14 +92,14 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
 
     /*メインループ*/
     private void startExecutor(){
-        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+        final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
         service.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 switch (mode){
                     case 0:
-                        gamestart(getHolder());
+                        mode=10;
                         break;
                     case 10:
                         stageinit();
@@ -119,8 +113,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
                             mode=30;
                         }
                         break;
-                    default:
+                    case 30:
+                    case 31:
                         clear(getHolder());
+                        break;
+                    case 33:
+                        getContext().startActivity(new Intent(getContext(), TitleActivity.class));
+                        service.shutdown();
+                        break;
+                    default:
                         break;
                 }
             }
@@ -159,16 +160,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
         c.drawColor(Color.rgb(100,100,100));
         Paint p = new Paint();
 
-        //if(score<4) {
-            c.drawBitmap(hisui0, pX , pY, p);
-
-    /*}else if(score<7){
-            c.drawBitmap(hisui1, pX , pY, p);
-        }else if(score<20) {
-            c.drawBitmap(hisui2, pX , pY, p);
-        }else{
-            c.drawBitmap(hisui3, pX , pY, p);
-        }*/
+        c.drawBitmap(hisui0, pX , pY, p);
 
         for (int i = 0; i < powernum; i++) {
             if (powers[i].flag == 1) {
@@ -183,11 +175,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
 
         p.setColor(Color.BLACK);
 
-        c.drawBitmap(mana, 0, 0, p);
+        //c.drawBitmap(mana, 0, 0, p);
 
         p.setTextSize(100);
-        c.drawText(":"+life,110,100,p);
-        c.drawText("得点:"+score,300,100,p);
+        c.drawText("マナ:"+life,0,100,p);
+        c.drawText("得点:"+score,400,100,p);
         c.drawText("パワー:"+powernum,0,200,p);
 
         holder.unlockCanvasAndPost(c);
@@ -195,40 +187,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
 
     /*--------------------以下ゲームシステム-----------------------------------------------------*/
 
-    /*スタート画面*/
-    private void gamestart(SurfaceHolder holder){
-        Canvas c = holder.lockCanvas();
-        c.drawColor(Color.rgb(255,255,0));
-        Paint p = new Paint();
 
-        p.setTextSize(150);
-        p.setColor(Color.RED);
-
-        c.drawText("Hisui Trainer", 0, fieldMaxY/2, p);
-
-        p.setTextSize(70);
-        p.setColor(Color.BLACK);
-        c.drawText("TAP TO START",0,fieldMaxY/2+100,p);
-
-        if(startflag==1){
-            counter++;
-            if(counter>=50) {
-                mode = 10;
-                startflag=0;
-                counter=0;
-            }
-        }
-
+    /*ステージの初期化*/
+    private void stageinit(){
         for(int i=0; i<powernum_max; i++){
             powers[i] = new Power(r.nextFloat() * fieldMaxX, 0);
         }
 
-        holder.unlockCanvasAndPost(c);
-
-    }
-
-    /*ステージの初期化*/
-    private void stageinit(){
         pX=fieldMaxX/2;
         pY=fieldMaxY-sizey/2-200;
         mode=20;
@@ -238,32 +203,35 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
         powerspeed=10;
     }
 
-
-
     /*力の移動と衝突*/
     private void powermove(){
         for(int i=0; i<powernum; i++) {
             if (powers[i].flag < 0) {
                 powers[i].flag += 1;
             } else if (powers[i].flag == 0) {
-                powers[i]= new Power(r.nextFloat() * fieldMaxX, 100);
+                powers[i]= new Power(sizex+r.nextFloat() * (fieldMaxX-sizex*2), 100);
             } else if (powers[i].flag == 1) {
                 powers[i].y += powerspeed;
                 if (Math.abs(pX - powers[i].x) < 50 && powers[i].y > fieldMaxY-sizey-150 && powers[i].y < fieldMaxY) {
                     if(powers[i].kind==0){
                         life+=1;
+                        powers[i].flag = -r.nextInt(100);
                     } else if(powers[i].kind==1) {
                         score += 1;
                         if (score % 5 == 0)
                             powerspeed += 0.5;
                         life -= 1;
+                        powers[i].x=powers[powernum-1].x;
+                        powers[i].y=powers[powernum-1].y;
+                        powers[i].kind=powers[powernum-1].kind;
+                        powers[i].flag=powers[powernum-1].flag;
+                        powers[powernum-1].flag=-r.nextInt(100);
                         powernum-=1;
                         if(powernum<=0){
                             powernum = 0;
                             mode = 30;
                         }
                     }
-                    powers[i].flag = -r.nextInt(100);
                 } else if (powers[i].y > fieldMaxY) {
                     if(powers[i].kind==1) {
                         powernum += 2;
@@ -298,18 +266,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
 
         p.setTextSize(70);
         p.setColor(Color.BLACK);
-        c.drawText("残り:"+life,0, fieldMaxY/2+100,p);
-        c.drawText("得点:"+score,0, fieldMaxY/2+200,p);
+        c.drawText("得点:"+score,0, fieldMaxY/2+100,p);
 
-
-
-        if(startflag==1){
-            counter++;
-            if(counter>=50) {
-                mode = 0;
-                startflag=0;
-                counter=0;
-            }
+        counter++;
+        if(counter>=100) {
+            mode = 33;
+            Log.d("d", "finish");
         }
 
         holder.unlockCanvasAndPost(c);
