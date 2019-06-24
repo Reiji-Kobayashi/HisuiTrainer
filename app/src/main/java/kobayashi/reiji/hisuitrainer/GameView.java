@@ -59,15 +59,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
     Bitmap Imhisui0 = BitmapFactory.decodeResource(res, R.drawable.hisui0);
     Bitmap hisui0 = Bitmap.createScaledBitmap(Imhisui0,200,sizey,false);
 
-
     Bitmap Imcoin = BitmapFactory.decodeResource(res, R.drawable.coin);
     Bitmap coin = Bitmap.createScaledBitmap(Imcoin,sizex,sizex,false);
 
     Bitmap Impower0 = BitmapFactory.decodeResource(res, R.drawable.power0);
     Bitmap power0 = Bitmap.createScaledBitmap(Impower0,sizex,sizex,false);
-
-    Bitmap Immana = BitmapFactory.decodeResource(res, R.drawable.mana);
-    Bitmap mana = Bitmap.createScaledBitmap(Immana,100,100,false);
 
     /*Surfaceview*/
     private void init(){
@@ -175,8 +171,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
 
         p.setColor(Color.BLACK);
 
-        //c.drawBitmap(mana, 0, 0, p);
-
         p.setTextSize(100);
         c.drawText("マナ:"+life,0,100,p);
         c.drawText("得点:"+score,400,100,p);
@@ -201,6 +195,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback{
         life=10;
         powernum=3;
         powerspeed=10;
+
+
+
+        //画面サイズに合わせて画像を更新
+        hisui0 = Bitmap.createScaledBitmap(Imhisui0,(int)fieldMaxX/7,(int)fieldMaxX/4,false);
+        coin = Bitmap.createScaledBitmap(Imcoin,(int)fieldMaxX/8,(int)fieldMaxX/8,false);
+        power0 = Bitmap.createScaledBitmap(Impower0,(int)fieldMaxX/8,(int)fieldMaxX/8,false);
     }
 
     /*力の移動と衝突*/
